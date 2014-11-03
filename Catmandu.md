@@ -189,7 +189,7 @@ $ catmandu convert MARC --fix ./shared/marc.fix to Template --template ./shared/
 
 ## CLI - convert()
 
-# see https://gbv.github.io/aREF/aREF.html and https://metacpan.org/pod/RDF::aREF
+see https://gbv.github.io/aREF/aREF.html and https://metacpan.org/pod/RDF::aREF
 
 ```cmd
 catmandu convert RDF --file ./shared/zdb_resources.rdf to YAML
