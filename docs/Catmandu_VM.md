@@ -1,5 +1,13 @@
 # Catmandu VM
 
+## User
+
+**USR:PWD**
+
+root:catmandu
+
+catmandu:catmandu
+
 ## SSH from GUEST to HOST
 
 The best way to login to a guest Linux VirtualBox VM is port forwarding. By default, you should have one interface already which is using NAT. Then go to the Network settings and click the Port Forwarding button. Add a new Rule:
