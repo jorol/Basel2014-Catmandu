@@ -661,7 +661,7 @@ sub fix {
 
 ```bash
 catmandu -I ./lib convert Hello < ./shared/names.csv 
-catmandu -D -I ./lib convert Hello < ./shared/names.csv
+catmandu -D -I ./lib convert Hello --fix "hello_world()" < ./shared/names.csv
 catmandu -I ./lib hello_world --greeting Moin
 ```
 
