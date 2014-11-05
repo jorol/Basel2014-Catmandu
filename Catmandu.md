@@ -317,8 +317,7 @@ $ catmandu delete ElasticSearch --index_name mab
 
 $ catmandu delete MongoDB --database_name marc --bag marc --query '{"dc.creator": "Wall, Larry."}'
 
-# Bug
-$ catmandu delete ElasticSearch --index_name mab --bag mab --q '_id:"1262750"'
+$ catmandu delete ElasticSearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"'
 ```
 
 ## CLI - move()
@@ -343,12 +342,11 @@ options:
 ## CLI - move()
 
 ```terminal
-$ catmandu move MongoDB --database_name marc --bag marc to ElasticSearch --index_name moved
+$ catmandu move MongoDB --database_name marc --bag marc to ElasticSearch --index_name moved --bag moved
 
-$ catmandu move MongoDB --database_name marc --bag marc --query '{"dc.creator": "Wall, Larry."}' to ElasticSearch --index_name moved
+$ catmandu move MongoDB --database_name marc --bag marc --query '{"dc.creator": "Wall, Larry."}' to ElasticSearch --index_name moved --bag moved
 
-# Bug
-$ catmandu move ElasticSearch --index_name moved --bag moved --query "dc.identifier:\"47918-4\"" to ElasticSearch --index_name selected --bag selected
+$ catmandu move ElasticSearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"' to ElasticSearch --index_name selected --bag selected
 ```
 
 ## CLI - data()

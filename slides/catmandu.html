@@ -155,7 +155,7 @@ class: center middle
 class: middle
 ## Metadata
 
-... catalogued in library specific formats (MARC21, MAB2, PICA+, ...) 
+... catalogued in library specific formats (MARC, MAB2, PICA, ...) 
 
 ... provided via library specific APIs (OAI, SRU, Z39.50, ...)
 
@@ -171,7 +171,7 @@ class: center middle
 class: center middle
 ## LibreCat
 
-... is an open collaboration of the three university libraries of Lund, Gent and Bielefeld
+... is an open collaboration of the three university libraries of **Bielefeld**, **Gent** and **Lund**
 
 ---
 class: middle
@@ -296,6 +296,35 @@ $ cat ./shared/journals_mab2.dat | catmandu convert MAB2 to JSON
 $ catmandu convert MAB2 to JSON < ./shared/journals_mab2.dat
 
 $ catmandu convert MAB2 --type XML to JSON < ./shared/journals_mab2.xml
+```
+
+---
+class: middle
+## CLI - convert()
+
+```json
+{
+   "_id" : "246797-5",
+   "record" : [
+      ...
+      [
+         "331",
+         " ",
+         "_",
+         "UNIX-Magazin"
+      ],
+      ...
+      [
+         "406",
+         "a",
+         "j",
+         "1988",
+         "k",
+         "1992"
+      ],
+      ...
+    ] 
+}
 ```
 
 ---
@@ -521,14 +550,13 @@ class: middle
 ```terminal
 $ catmandu delete MongoDB --database_name mab --bag mab
 
-$ catmandu delete ElasticSearch --index_name mab
+$ catmandu delete ElasticSearch --index_name mab --bag mab
 
 $ catmandu delete MongoDB --database_name marc --bag marc 
     --query '{"dc.creator": "Wall, Larry."}'
 
-# Bug
 $ catmandu delete ElasticSearch --index_name mab --bag mab 
-    --query '_id:"1262750"'
+    --query '_id:"http://example.org/1142708-5"'
 ```
 
 ---
@@ -564,9 +592,8 @@ $ catmandu move MongoDB --database_name marc --bag marc
     --query '{"dc.creator": "Wall, Larry."}' 
     to ElasticSearch --index_name moved
 
-# Bug
-$ catmandu move ElasticSearch --index_name moved --bag moved 
-    --query "dc.identifier:\"47918-4\"" 
+$ catmandu move ElasticSearch --index_name mab --bag mab 
+    --query '_id:"http://example.org/1142708-5"' 
     to ElasticSearch --index_name selected --bag selected
 ```
 
@@ -605,16 +632,16 @@ $ catmandu data --from-store MongoDB --from-database_name marc
     --from-bag marc --query '{"dc.creator": "Wall, Larry."}'
 
 $ catmandu data --from-store ElasticSearch --from-index_name marc 
-    --query "dc.creator:\"Wall, Larry.\""
+    --query 'dc.creator:"Wall, Larry."'
 
 $ catmandu data --from-store ElasticSearch --from-index_name mab 
-    --from-bag mab --cql-query "publisher exact Heise"
+    --from-bag mab --cql-query 'publisher exact Heise'
 
 $ catmandu data --from-store ElasticSearch --from-index_name mab 
-    --from-bag mab --cql-query "issued > 2009" --into-exporter YAML
+    --from-bag mab --cql-query 'issued > 2009' --into-exporter YAML
 
 $ catmandu data --from-store ElasticSearch --from-index_name mab 
-    --from-bag mab --cql-query "issued > 2009" --into-exporter CSV 
+    --from-bag mab --cql-query 'issued > 2009' --into-exporter CSV 
     --fix 'retain_field("_id")'
 ```
 
@@ -690,7 +717,7 @@ class: middle
 pica_map('001A0','date');
 pica_map('010@a','language');
 pica_map('009Qa','primaryTopicOf.$append');
-pica_map('027A[01]a','furtherTitle');
+pica_map('027A[01]a','varyingFormOfTitle');
 remove_field('record');
 ```
 
@@ -862,6 +889,20 @@ cmd("java MyClass");
 
 ---
 class: middle
+## Fix - Binds
+
+... provide processing hooks around Fix functions
+
+```terminal
+$ echo "{}" | catmandu convert --fix 'meow()'
+{ "meow": "Prrr" }
+$ echo "{}" | catmandu convert --fix 'do bark() meow() end'
+woof! woof!
+{ "meow": "Prrr" }
+```
+
+---
+class: middle
 ## config
 
 ```terminal
@@ -912,17 +953,44 @@ class: middle
 
 ---
 class: middle
+## CMD
+
+```perl
+package Catmandu::Importer::Hello;
+use Catmandu::Sane;
+use Moo;
+with 'Catmandu::Importer';
+ 
+sub generator {
+    my ($self) = @_;
+    state $fh = $self->fh;
+    state $n = 0;
+    return sub {
+        $self->log->debug("generating record " . ++$n);
+        my $line = $self->readline or return;
+        my ($name) = split(',', $line);
+        return $name
+            ? { "hello" => $name }
+            : $self->log->warn( "no name found for record " . $n );
+    };
+} 
+
+1;
+```
+
+---
+class: middle
 ## Fix
 
 ```perl
-package Fix::foo;
+package Catmandu::Fix::hello_world;
 
 use Moo;
 
 sub fix {
     my ($self,$data) = @_;
 
-    # Fix your data here...
+    $data->{hello} = 'world';
 
     return $data;
 }
@@ -930,6 +998,36 @@ sub fix {
 1;
 ```
 
+---
+class: middle
+## CMD
+
+```perl
+package Catmandu::Cmd::hello_world;
+use parent 'Catmandu::Cmd';
+ 
+sub command_opt_spec {
+   (
+       [ "greeting|g=s", "provide a greeting text" ],
+   );
+}
+ 
+sub description {
+   <<EOS;
+examples:
+catmandu hello_world --greeting "Hoi"
+options:
+EOS
+}
+ 
+sub command {
+   my ($self, $opts, $args) = @_;
+   my $greeting = $opts->greeting // 'Hello';
+   print "$greeting, World!\n"
+}
+ 
+1;
+```
 ---
 class: middle
 ## Extensions
@@ -955,8 +1053,33 @@ http://github.com/LibreCat/Catmandu
 
 ---
 class: middle
-.center[![Geek&Poke](./img/geekandpoke_book.png "geek-and-poke.com Books 2009.01.08")]
-.center[<small>\[Comic by [Oliver Widder](http://geek-and-poke.com), [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/deed.en_U)\]</small>]
+.center[![XKCD](./img/xkcd_perl.png "xkcd.com/519/")]
+.center[<small>\[Comic by [Randall Munroe](http://xkcd.com/519/), [CC BY-NC 2.5](https://creativecommons.org/licenses/by-nc/2.5/)\]</small>]
+
+---
+class: middle center
+## Perl
+
+install your own Perl with **perlbrew**
+
+install modules with **cpanm**
+
+use **Dist::Milla** for your distributions
+
+manage your own repository with **Pinto/Stratopan**
+
+---
+class: middle center
+## Perl - Links
+
+http://cpanmin.us
+
+http://perlbrew.pl/
+
+https://metacpan.org/pod/distribution/Dist-Milla/lib/Dist/Milla/Tutorial.pod
+
+https://stratopan.com/
+
 
     </textarea>
     <div id="slideshow"></div>

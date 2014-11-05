@@ -19,16 +19,33 @@ The best way to login to a guest Linux VirtualBox VM is port forwarding. By defa
 
 SSH from host to guest:
 
+```terminal
     ssh -p 3022 catmandu@127.0.0.1
+```
 
 Copy files from host to guest:
 
+```terminal
     scp -P 3022 -r ./shared catmandu@127.0.0.1:/home/catmandu
+```
 
 ## Elasticsearch
 
 Elasticsearch must be startet by **root**:
 
-    $ cd ./elasticsearch-0.09.13
-    $ ./bin/elasticsearch
+```terminal
+$ su
+$ cd ./elasticsearch-0.09.13
+$ ./bin/elasticsearch
+```
 
+## Set keyboard layout
+
+```terminal
+# root
+$ su
+# change layout
+$ dpkg-reconfigure keyboard-configuration
+# restart
+$ shutdown -r 0 
+```
