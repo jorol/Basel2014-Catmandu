@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -145,11 +146,6 @@ class: center middle
 Swissbib 6 November 2014 Basel, Switzerland
 
 Johann Rolschewski
----
-class: center middle
-## Metadata
-
-![Katalog](./img/code4lib.png "Katalog")
 
 ---
 class: middle
@@ -444,10 +440,10 @@ $ mongo
 > use marc
 > db.marc.find()
 
-$ catmandu import MARC --type RAW --fix ./shared/marc.fix to ElasticSearch 
+$ catmandu import MARC --type RAW --fix ./shared/marc.fix to Elasticsearch 
     --index_name marc --bag marc < ./shared/camel.mrc
 
-$ catmandu import MAB2 --fix ./shared/mab2rdf.fix to ElasticSearch 
+$ catmandu import MAB2 --fix ./shared/mab2rdf.fix to Elasticsearch 
     --index_name mab --bag mab < ./shared/journals_mab2.dat
 
 $ curl 'http://localhost:9200/mab/_search?q=*'
@@ -480,9 +476,9 @@ class: middle
 ```terminal
 $ catmandu export MongoDB --database_name mab --bag mab to JSON
 
-$ catmandu export ElasticSearch --index_name marc --bag marc to JSON
+$ catmandu export Elasticsearch --index_name marc --bag marc to JSON
 
-$ catmandu export ElasticSearch --index_name mab --bag mab 
+$ catmandu export Elasticsearch --index_name mab --bag mab 
     --query '_id:"http://example.org/1142708-5"'
 
 ```
@@ -496,7 +492,7 @@ catmandu count [-?hLq] [long options...]
 
 examples:
 
-catmandu count ElasticSearch --index_name shop --bag products 
+catmandu count Elasticsearch --index_name shop --bag products 
     --query 'brand:Acme'
 
 options:
@@ -516,11 +512,11 @@ $ catmandu count MongoDB --database_name mab --bag mab
 $ catmandu count MongoDB --database_name marc --bag marc 
     --query '{"dc.creator": "Wall, Larry."}'
 
-$ catmandu count ElasticSearch --index_name mab  --bag mab
-$ catmandu count ElasticSearch --index_name mab --bag mab 
+$ catmandu count Elasticsearch --index_name mab  --bag mab
+$ catmandu count Elasticsearch --index_name mab --bag mab 
     --query 'dc_title:"magazin"'
 
-$ catmandu count ElasticSearch --index_name marc --bag marc 
+$ catmandu count Elasticsearch --index_name marc --bag marc 
     --query 'dc.creator:"wall"'
 ```
 
@@ -533,7 +529,7 @@ catmandu delete [-?hLq] [long options...]
 
 examples:
 
-catmandu delete ElasticSearch --index_name items 
+catmandu delete Elasticsearch --index_name items 
     --bag book -q 'title:"Programming Perl"'
 
 options:
@@ -550,12 +546,12 @@ class: middle
 ```terminal
 $ catmandu delete MongoDB --database_name mab --bag mab
 
-$ catmandu delete ElasticSearch --index_name mab --bag mab
+$ catmandu delete Elasticsearch --index_name mab --bag mab
 
 $ catmandu delete MongoDB --database_name marc --bag marc 
     --query '{"dc.creator": "Wall, Larry."}'
 
-$ catmandu delete ElasticSearch --index_name mab --bag mab 
+$ catmandu delete Elasticsearch --index_name mab --bag mab 
     --query '_id:"http://example.org/1142708-5"'
 ```
 
@@ -569,7 +565,7 @@ catmandu move [-?hLqv] [long options...]
 examples:
 
 catmandu move MongoDB --database_name items --bag book 
-    to ElasticSearch --index_name items --bag book
+    to Elasticsearch --index_name items --bag book
 
 options:
 
@@ -585,16 +581,16 @@ class: middle
 ## CLI - move()
 
 ```terminal
-$ catmandu move MongoDB --database_name marc --bag marc to ElasticSearch 
+$ catmandu move MongoDB --database_name marc --bag marc to Elasticsearch 
     --index_name moved
 
 $ catmandu move MongoDB --database_name marc --bag marc 
     --query '{"dc.creator": "Wall, Larry."}' 
-    to ElasticSearch --index_name moved
+    to Elasticsearch --index_name moved
 
-$ catmandu move ElasticSearch --index_name mab --bag mab 
+$ catmandu move Elasticsearch --index_name mab --bag mab 
     --query '_id:"http://example.org/1142708-5"' 
-    to ElasticSearch --index_name selected --bag selected
+    to Elasticsearch --index_name selected --bag selected
 ```
 
 ---
@@ -631,16 +627,16 @@ class: middle
 $ catmandu data --from-store MongoDB --from-database_name marc 
     --from-bag marc --query '{"dc.creator": "Wall, Larry."}'
 
-$ catmandu data --from-store ElasticSearch --from-index_name marc 
+$ catmandu data --from-store Elasticsearch --from-index_name marc 
     --query 'dc.creator:"Wall, Larry."'
 
-$ catmandu data --from-store ElasticSearch --from-index_name mab 
+$ catmandu data --from-store Elasticsearch --from-index_name mab 
     --from-bag mab --cql-query 'publisher exact Heise'
 
-$ catmandu data --from-store ElasticSearch --from-index_name mab 
+$ catmandu data --from-store Elasticsearch --from-index_name mab 
     --from-bag mab --cql-query 'issued > 2009' --into-exporter YAML
 
-$ catmandu data --from-store ElasticSearch --from-index_name mab 
+$ catmandu data --from-store Elasticsearch --from-index_name mab 
     --from-bag mab --cql-query 'issued > 2009' --into-exporter CSV 
     --fix 'retain_field("_id")'
 ```
@@ -914,7 +910,7 @@ store:
    options:
     database_name: mydb
   els:
-   package: ElasticSearch
+   package: Elasticsearch
    options:
     index_name: mydb
   sol:
@@ -957,23 +953,23 @@ class: middle
 
 ```perl
 package Catmandu::Importer::Hello;
+
 use Catmandu::Sane;
 use Moo;
 with 'Catmandu::Importer';
- 
+
 sub generator {
     my ($self) = @_;
     state $fh = $self->fh;
     state $n = 0;
     return sub {
-        $self->log->debug("generating record " . ++$n);
         my $line = $self->readline or return;
-        my ($name) = split(',', $line);
+        my ($name) = split( ',', $line );
         return $name
             ? { "hello" => $name }
-            : $self->log->warn( "no name found for record " . $n );
+            : { "hello" => 'World' };
     };
-} 
+}
 
 1;
 ```

@@ -10,12 +10,11 @@ sub generator {
     state $fh = $self->fh;
     state $n = 0;
     return sub {
-        $self->log->debug( "generating record " . ++$n );
         my $line = $self->readline or return;
         my ($name) = split( ',', $line );
         return $name
             ? { "hello" => $name }
-            : $self->log->warn( "no name found for record " . $n );
+            : { "hello" => 'World' };
     };
 }
 

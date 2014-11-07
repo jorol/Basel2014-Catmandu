@@ -1,3 +1,4 @@
+
 # Catmandu - Importing, transforming, storing and indexing data should be easy
 
 Swissbib 6 November 2014 Basel, Switzerland
@@ -225,9 +226,9 @@ $ mongo
 > use marc
 > db.marc.find()
 
-$ catmandu import MARC --type RAW --fix ./shared/marc.fix to ElasticSearch --index_name marc --bag marc < ./shared/camel.mrc
+$ catmandu import MARC --type RAW --fix ./shared/marc.fix to Elasticsearch --index_name marc --bag marc < ./shared/camel.mrc
 
-$ catmandu import MAB2 --fix ./shared/mab2rdf.fix to ElasticSearch --index_name mab --bag mab < ./shared/journals_mab2.dat
+$ catmandu import MAB2 --fix ./shared/mab2rdf.fix to Elasticsearch --index_name mab --bag mab < ./shared/journals_mab2.dat
 
 $ curl 'http://localhost:9200/mab/_search?q=*'
 ```
@@ -255,9 +256,9 @@ options:
 ```terminal
 $ catmandu export MongoDB --database_name mab --bag mab to JSON
 
-$ catmandu export ElasticSearch --index_name marc --bag marc to JSON
+$ catmandu export Elasticsearch --index_name marc --bag marc to JSON
 
-$ catmandu export ElasticSearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"'
+$ catmandu export Elasticsearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"'
 
 ```
 
@@ -268,7 +269,7 @@ catmandu count [-?hLq] [long options...]
 
 examples:
 
-catmandu count ElasticSearch --index_name shop --bag products 
+catmandu count Elasticsearch --index_name shop --bag products 
     --query 'brand:Acme'
 
 options:
@@ -285,10 +286,10 @@ $ catmandu count MongoDB --database_name mab --bag mab
 
 $ catmandu count MongoDB --database_name marc --bag marc --query '{"dc.creator": "Wall, Larry."}'
 
-$ catmandu count ElasticSearch --index_name mab  --bag mab
-$ catmandu count ElasticSearch --index_name mab --bag mab --query 'dc_title:"magazin"'
+$ catmandu count Elasticsearch --index_name mab  --bag mab
+$ catmandu count Elasticsearch --index_name mab --bag mab --query 'dc_title:"magazin"'
 
-$ catmandu count ElasticSearch --index_name marc --bag marc --query 'dc.creator:"wall"'
+$ catmandu count Elasticsearch --index_name marc --bag marc --query 'dc.creator:"wall"'
 ```
 
 ## CLI - delete()
@@ -298,7 +299,7 @@ catmandu delete [-?hLq] [long options...]
 
 examples:
 
-catmandu delete ElasticSearch --index_name items 
+catmandu delete Elasticsearch --index_name items 
     --bag book -q 'title:"Programming Perl"'
 
 options:
@@ -313,11 +314,11 @@ options:
 ```terminal
 $ catmandu delete MongoDB --database_name mab --bag mab
 
-$ catmandu delete ElasticSearch --index_name mab
+$ catmandu delete Elasticsearch --index_name mab
 
 $ catmandu delete MongoDB --database_name marc --bag marc --query '{"dc.creator": "Wall, Larry."}'
 
-$ catmandu delete ElasticSearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"'
+$ catmandu delete Elasticsearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"'
 ```
 
 ## CLI - move()
@@ -328,7 +329,7 @@ catmandu move [-?hLqv] [long options...]
 examples:
 
 catmandu move MongoDB --database_name items --bag book 
-    to ElasticSearch --index_name items --bag book
+    to Elasticsearch --index_name items --bag book
 
 options:
 
@@ -342,11 +343,11 @@ options:
 ## CLI - move()
 
 ```terminal
-$ catmandu move MongoDB --database_name marc --bag marc to ElasticSearch --index_name moved --bag moved
+$ catmandu move MongoDB --database_name marc --bag marc to Elasticsearch --index_name moved --bag moved
 
-$ catmandu move MongoDB --database_name marc --bag marc --query '{"dc.creator": "Wall, Larry."}' to ElasticSearch --index_name moved --bag moved
+$ catmandu move MongoDB --database_name marc --bag marc --query '{"dc.creator": "Wall, Larry."}' to Elasticsearch --index_name moved --bag moved
 
-$ catmandu move ElasticSearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"' to ElasticSearch --index_name selected --bag selected
+$ catmandu move Elasticsearch --index_name mab --bag mab --query '_id:"http://example.org/1142708-5"' to Elasticsearch --index_name selected --bag selected
 ```
 
 ## CLI - data()
@@ -378,13 +379,13 @@ catmandu data [-?hLqv] [long options...]
 ```terminal
 $ catmandu data --from-store MongoDB --from-database_name marc --from-bag marc --query '{"dc.creator": "Wall, Larry."}'
 
-$ catmandu data --from-store ElasticSearch --from-index_name marc --query "dc.creator:\"Wall, Larry.\""
+$ catmandu data --from-store Elasticsearch --from-index_name marc --query "dc.creator:\"Wall, Larry.\""
 
-$ catmandu data --from-store ElasticSearch --from-index_name mab --from-bag mab --cql-query "publisher exact Heise"
+$ catmandu data --from-store Elasticsearch --from-index_name mab --from-bag mab --cql-query "publisher exact Heise"
 
-$ catmandu data --from-store ElasticSearch --from-index_name mab --from-bag mab --cql-query "issued > 2009" --into-exporter YAML
+$ catmandu data --from-store Elasticsearch --from-index_name mab --from-bag mab --cql-query "issued > 2009" --into-exporter YAML
 
-$ catmandu data --from-store ElasticSearch --from-index_name mab --from-bag mab --cql-query "issued > 2009" --into-exporter CSV --fix 'retain_field("_id")'
+$ catmandu data --from-store Elasticsearch --from-index_name mab --from-bag mab --cql-query "issued > 2009" --into-exporter CSV --fix 'retain_field("_id")'
 ```
 
 ## CLI - APIs
@@ -602,7 +603,7 @@ store:
    options:
     database_name: mydb
   els:
-   package: ElasticSearch
+   package: Elasticsearch
    options:
     index_name: mydb
   sol:
@@ -637,17 +638,42 @@ $ catmandu export sol
 │   │   ├── Foo.pm
 ```
 
+## CMD
+
+```perl
+package Catmandu::Importer::Hello;
+
+use Catmandu::Sane;
+use Moo;
+with 'Catmandu::Importer';
+
+sub generator {
+    my ($self) = @_;
+    state $fh = $self->fh;
+    state $n = 0;
+    return sub {
+        my $line = $self->readline or return;
+        my ($name) = split( ',', $line );
+        return $name
+            ? { "hello" => $name }
+            : { "hello" => 'World' };
+    };
+}
+
+1;
+```
+
 ## Fix
 
 ```perl
-package Fix::foo;
+package Catmandu::Fix::hello_world;
 
 use Moo;
 
 sub fix {
     my ($self,$data) = @_;
 
-    # Fix your data here...
+    $data->{hello} = 'World';
 
     return $data;
 }
@@ -655,11 +681,41 @@ sub fix {
 1;
 ```
 
+## CMD
+
+```perl
+package Catmandu::Cmd::hello_world;
+use parent 'Catmandu::Cmd';
+ 
+sub command_opt_spec {
+   (
+       [ "greeting|g=s", "provide a greeting text" ],
+   );
+}
+ 
+sub description {
+   <<EOS;
+examples:
+catmandu hello_world --greeting "Hoi"
+options:
+EOS
+}
+ 
+sub command {
+   my ($self, $opts, $args) = @_;
+   my $greeting = $opts->greeting // 'Hello';
+   print "$greeting, World!\n"
+}
+ 
+1;
+```
+
 ## Extensions
 
-```bash
+```terminal
 catmandu -I ./lib convert Hello < ./shared/names.csv 
-catmandu -D -I ./lib convert Hello --fix "hello_world()" < ./shared/names.csv
+catmandu -D -I ./lib convert Hello --fix "hello_world()" 
+    < ./shared/names.csv
 catmandu -I ./lib hello_world --greeting Moin
 ```
 
